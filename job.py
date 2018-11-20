@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+"""
+spark streaming job which analysis the data from kafka
+"""
+# pylint: disable=invalid-name, import-error, redefined-outer-name
 
 from __future__ import print_function
 
@@ -9,6 +13,10 @@ from pyspark import SparkContext
 from pyspark.streaming import StreamingContext
 from pyspark.streaming.kafka import KafkaUtils
 
+from consoleLog import get_logger
+
+logger = get_logger("producer")
+
 def get_people_with_hashtags(tweet):
     """
     Returns (people, hashtags) if successful, otherwise returns empty tuple. All users
@@ -18,7 +26,7 @@ def get_people_with_hashtags(tweet):
     try:
         hashtags = ["#" + hashtag["text"] for hashtag in data['entities']['hashtags']]
         # Tweets without hashtags are a waste of time
-        if len(hashtags) == 0:
+        if not hashtags:
             return ()
         author = data['user']['screen_name']
         mentions = ["@" + user["screen_name"] for user in data['entities']['user_mentions']]
@@ -57,9 +65,7 @@ def flatten(x):
         for hashtag in hashtags:
             main_author_flag = 0 if "@" in person else 1
             all_combinations.append((hashtag, (main_author_flag, {person})))
-    
-    return all_combinations 
-
+    return all_combinations
 
 if __name__ == "__main__":
     zkQuorum = "10.0.0.8:2181"
@@ -67,7 +73,7 @@ if __name__ == "__main__":
 
     # User-supplied command arguments
     if len(sys.argv) != 3:
-        print("Usage: spark-stream-tweets.py <min_hashtag_counts> <seconds_to_run>")
+        logger.error("Usage: spark-stream-tweets.py <min_hashtag_counts> <seconds_to_run>")
         exit(-1)
     min_hashtag_counts = int(sys.argv[1])
     seconds_to_run = int(sys.argv[2])
@@ -76,13 +82,13 @@ if __name__ == "__main__":
     ssc = StreamingContext(sc, seconds_to_run)
 
     tweets = KafkaUtils.createStream(ssc, zkQuorum, "spark-streaming-consumer", {topic: 1})
-    # Tweet processing. 
+    # Tweet processing.
     # Kafka passes a tuple of message ID and message text. Message text is the tweet text.
     # All tweets are turned into ([people],[hashtags]) and tweets without hashtags are filtered
     # out.
 
     # Returns ([people], [hashtags])
-    lines = tweets.map(lambda x: get_people_with_hashtags(x[1])).filter(lambda x: len(x)>0)
+    lines = tweets.map(lambda x: get_people_with_hashtags(x[1])).filter(lambda x: len(x) > 0)
 
     # Filters out unicode hashtags
     hashtags = lines.map(filter_out_unicode)
@@ -101,4 +107,3 @@ if __name__ == "__main__":
 
     ssc.start()
     ssc.awaitTermination()
-
