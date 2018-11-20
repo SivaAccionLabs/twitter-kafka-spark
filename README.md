@@ -1,10 +1,8 @@
-﻿
-Analyze Tweets using Kafka and Spark Streaming
+﻿Analyze Tweets using Kafka and Spark Streaming
 -------------------------------------------------
 1) Using twitter API, get the real time tweets from the twitter and ingest to Kafka.
 
 2) Proccess the kafka data using spark streaming to track popular hashtags and trendsetters for each hashtag.
-
 
 
 Requirement.
@@ -27,14 +25,13 @@ pip install kafka
 
 virtualenv --python=/usr/bin/python2.6 <path/to/new/virtualenv/>
 
-Update twitter_config.py with twitter developer account secret key
+Update config.py with twitter developer account secret key
 
-Update kafka broker ip and topic name in kafka-twitter-producer.py 
+Update kafka broker ip and topic name in producer.py 
 
-Update zookeeper ip and topic name in spark-stream-tweets.py
+Update zookeeper ip and topic name in job.py
 
-Run kafka-twitter-producer.py  file
-
+Run producer.py  file
 
 
 F)Run spark jobs
@@ -42,10 +39,6 @@ F)Run spark jobs
 spark-submit --jars /home/centos/spark-streaming-kafka-assembly_2.10-1.6.3.jar spark-stream-tweets.py 2 60
 
 spark-submit --master yarn --jars /home/pnda/spark-streaming-kafka-assembly_2.10-1.6.3.jar spark-stream-tweets.py 2 60 
-
-
-
-
 
 Get the tweets data like this example:
 ----------------------------------------------------------------------
@@ -64,7 +57,6 @@ Step 1:
 ([u'@EMMMZbaeee', u'yaappong'], [u'#MULBERRYxSEOUL', u'#BLACKPINK'])
 ([u'@HealthRanger', u'studentveronica'], [u'#salad'])
 ([u'@5sosworldalerts', u'5soswith_fans'], [u'#5SOS', u'#TheGroup', u'#PCAs'])
-
 
 Step 2
 -----------------------
@@ -85,10 +77,6 @@ Step 2
 ('#BTSonAGT', (0, set([u'@bts_bighit'])))
 ('#BTSonAGT', (1, set([u'samiKONICARMY'])))
 
-
-
 Step 3
 ------------------------------
 ('#BTSonAGT', (4, set([u'@btsanalytics', u'samiKONICARMY', u'@spjm_vid', u'@BTS_twt', u'@bts_bighit', u'honesilk', u'SolRodr13968887', u'_poemusician', u'@AGT'])))
-
-
